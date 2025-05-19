@@ -1,8 +1,67 @@
+version: "3.8"
+
 services:
-  nginx:
+  mariadb:
+    container_name: mariadb
     build:
-      context: requirements/nginx
-      dockerfile: Dockerfile
-      platform: linux/amd64 #sur mac docker compose --env-file .env up --build
+      context: ./requirements/mariadb
+    env_file:
+      - .env
+    volumes:
+      - mariadb:/var/lib/mysql
+    networks:
+      - inception
+    restart: unless-stopped
+    expose:
+      - "3306"
 
+  wordpress:
+    container_name: wordpress
+    build:
+      context: ./requirements/wordpress
+    env_file:
+      - .env
+    volumes:
+      - wordpress:/var/www/wordpress
+    networks:
+      - inception
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+    expose:
+      - "9000"
 
+  nginx:
+    container_name: nginx
+    build:
+      context: ./requirements/nginx
+    env_file:
+      - .env
+    volumes:
+      - wordpress:/var/www/wordpress
+    networks:
+      - inception
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    restart: unless-stopped
+
+volumes:
+  mariadb:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/melinaaam/data/mariadb
+
+  wordpress:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/melinaaam/data/wordpress
+
+networks:
+  inception:
+    driver: bridge
