@@ -1,0 +1,8 @@
+services:
+  nginx:
+    build:
+      context: requirements/nginx
+      dockerfile: Dockerfile
+      platform: linux/amd64 #sur mac docker compose --env-file .env up --build
+
+
