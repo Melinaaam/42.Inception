@@ -5,29 +5,39 @@ services:
     container_name: mariadb
     build:
       context: ./requirements/mariadb
+    image: mariadb_custom
     env_file:
       - .env
     volumes:
       - mariadb:/var/lib/mysql
     networks:
       - inception
-    restart: unless-stopped
+    restart: always
     expose:
       - "3306"
-
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      
   wordpress:
     container_name: wordpress
     build:
       context: ./requirements/wordpress
+    image: wordpress_custom
     env_file:
       - .env
+    depends_on:
+      mariadb:
+        condition: service_healthy
     volumes:
-      - wordpress:/var/www/wordpress
+      - wordpress:/var/www/html
     networks:
       - inception
     depends_on:
       - mariadb
-    restart: unless-stopped
+    restart: always
     expose:
       - "9000"
 
@@ -35,17 +45,18 @@ services:
     container_name: nginx
     build:
       context: ./requirements/nginx
+    image: nginx_custom
     env_file:
       - .env
     volumes:
-      - wordpress:/var/www/wordpress
+      - wordpress:/var/www/html
     networks:
       - inception
     depends_on:
       - wordpress
     ports:
       - "443:443"
-    restart: unless-stopped
+    restart: always
 
 volumes:
   mariadb:
@@ -53,14 +64,14 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/melinaaam/data/mariadb
+      device: /home/${USER}/data/mariadb
 
   wordpress:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/melinaaam/data/wordpress
+      device: /home/${USER}/data/wordpress
 
 networks:
   inception:

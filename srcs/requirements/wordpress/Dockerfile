@@ -1,28 +1,34 @@
-FROM debian:bullseye
+FROM debian:bookworm
 
-RUN apt-get update && \
+RUN apt-get update -y && \
     apt-get install -y \
-        php \
+        php8.2 \
         php-fpm \
         php-mysql \
         mariadb-client \
         wget \
         curl \
         unzip \
-        less \
-        vim \
-        gnupg \
+        sed \
         lsb-release && \
     apt-get clean
 
-	RUN wget https://fr.wordpress.org/wordpress-6.4.2-fr_FR.tar.gz -P /tmp && \
-    tar -xzf /tmp/wordpress-6.4.2-fr_FR.tar.gz -C /tmp && \
-    mv /tmp/wordpress-6.4.2-fr_FR /tmp/wordpress && \
-    rm -rf /tmp/wordpress-6.4.2-fr_FR.tar.gz
 
-# Entrypoint qui déplace WordPress si le volume est vide
-COPY ./tools/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN mkdir -p /var/www/html
+RUN wget https://wordpress.org/latest.tar.gz && tar -xzf latest.tar.gz && \
+    mv wordpress/* /var/www/html && rm -rf wordpress latest.tar.gz
 
-ENTRYPOINT [ "entrypoint.sh" ]
-CMD [ "php-fpm7.4", "-F" ]
+
+RUN sed -i 's|^listen = .*|listen = wordpress:9000|' /etc/php/8.2/fpm/pool.d/www.conf
+
+COPY tools/setupWP.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/setupWP.sh
+
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN chmod +x wp-cli.phar
+RUN mv wp-cli.phar /usr/local/bin/wp
+
+EXPOSE 9000
+
+ENTRYPOINT ["/usr/local/bin/setupWP.sh"]
+CMD ["/usr/sbin/php-fpm8.2", "-F"]

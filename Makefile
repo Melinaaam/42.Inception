@@ -1,5 +1,5 @@
 NAME=inception
-COMPOSE=docker-compose -f srcs/docker-compose.yml
+COMPOSE=docker-compose -f srcs/docker-compose.yml --env-file srcs/.env
 
 up:
 	$(COMPOSE) up -d --build

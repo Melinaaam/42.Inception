@@ -1,19 +1,22 @@
-FROM debian:bullseye
+FROM debian:bookworm
 
-RUN apt-get update && apt-get upgrade -y && \
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
     apt-get install -y nginx openssl && \
-    mkdir -p /etc/nginx/ssl /var/www/wordpress && \
     rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /etc/nginx/ssl
+
 # Générer certificat SSL auto-signé
-RUN openssl req -x509 -nodes -days 365 \
-    -newkey rsa:2048 \
+RUN openssl req -x509 -nodes \
     -keyout /etc/nginx/ssl/inception.key \
     -out /etc/nginx/ssl/inception.crt \
-    -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=42/CN=login.42.fr"
+    -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=42/CN=memotyle.42.fr/UID=memotyle"
 
+RUN mkdir -p /var/run/nginx
 COPY ./conf/nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 443
+RUN chmod 755 /var/www/html
+RUN chown -R www-data:www-data /var/www/html
 
 CMD ["nginx", "-g", "daemon off;"]
