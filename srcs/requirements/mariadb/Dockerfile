@@ -8,6 +8,7 @@ RUN apt-get update -y && \
 COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 #script a la racine
 COPY tools/setup.sh /usr/local/bin/setup.sh
+
 RUN chmod +x /usr/local/bin/setup.sh
 
 RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld

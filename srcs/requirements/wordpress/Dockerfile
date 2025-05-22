@@ -19,7 +19,7 @@ RUN wget https://wordpress.org/latest.tar.gz && tar -xzf latest.tar.gz && \
     mv wordpress/* /var/www/html && rm -rf wordpress latest.tar.gz
 
 
-RUN sed -i 's|^listen = .*|listen = wordpress:9000|' /etc/php/8.2/fpm/pool.d/www.conf
+RUN sed -i 's|^listen = .*|listen = 0.0.0.0:9000|' /etc/php/8.2/fpm/pool.d/www.conf
 
 COPY tools/setupWP.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/setupWP.sh

@@ -2,6 +2,10 @@
 
 set -e
 
+export WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_password.txt)
+export WP_USER_PASSWORD=$(cat /run/secrets/wp_user_password.txt)
+export DB_PASSWORD=$(cat /run/secrets/db_password.txt)
+
 WP_PATH="/var/www/html"
 
 if [ ! -f "$WP_PATH/wp-load.php" ]; then
@@ -13,7 +17,7 @@ cat <<EOF > "$WP_PATH/wp-config.php"
 <?php
 define('DB_NAME', '${MYSQL_DATABASE}');
 define('DB_USER', '${MYSQL_USER}');
-define('DB_PASSWORD', '${MYSQL_PASSWORD}');
+define('DB_PASSWORD', '${DB_PASSWORD}');
 define('DB_HOST', 'mariadb');
 define('DB_CHARSET', 'utf8');
 define('DB_COLLATE', '');
@@ -23,7 +27,7 @@ if ( !defined('ABSPATH') ) define('ABSPATH', __DIR__ . '/');
 require_once ABSPATH . 'wp-settings.php';
 EOF
 
-until mysql -h "mariadb" -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" -e "SELECT 1" > /dev/null 2>&1; do
+until mysql -h "mariadb" -u "${MYSQL_USER}" -p"${DB_PASSWORD}" -e "SELECT 1" > /dev/null 2>&1; do
   echo "Waiting for MariaDB..."
   sleep 2
 done
