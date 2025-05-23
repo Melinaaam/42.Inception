@@ -23,6 +23,11 @@ services:
     secrets:
       - db_password.txt
       - db_root_password.txt
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
       
   wordpress:
     container_name: wordpress
@@ -38,8 +43,6 @@ services:
       - wordpress:/var/www/html
     networks:
       - inception
-    depends_on:
-      - mariadb
     restart: always
     expose:
       - "9000"

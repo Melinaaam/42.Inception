@@ -1,0 +1,4 @@
+../../secrets/*
+*.md
+.git
+.gitignore
