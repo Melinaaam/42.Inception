@@ -22,6 +22,3 @@ re: fclean up
 rebuild: fclean up
 
 .PHONY: up down clean fclean re
-
-#make up : build et lance ts les containeres
-#make down:stop les containers

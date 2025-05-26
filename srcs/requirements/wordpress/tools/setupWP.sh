@@ -10,7 +10,6 @@ export MYSQL_PASSWORD=$(cat /run/secrets/db_password.txt)
 mkdir -p /run/php
 WP_PATH="/var/www/html"
 
-# Configuration WordPress si absent
 if [ ! -f "$WP_PATH/wp-load.php" ]; then
   echo "Téléchargement de WordPress..."
   wp core download --path="$WP_PATH" --allow-root
@@ -30,13 +29,11 @@ if ( !defined('ABSPATH') ) define('ABSPATH', __DIR__ . '/');
 require_once ABSPATH . 'wp-settings.php';
 EOF
 
-# Attente de MariaDB
 until mysql -h "mariadb" -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" -e "SELECT 1" &>/dev/null; do
   echo "En attente de MariaDB..."
   sleep 2
 done
 
-# Installation WordPress
 if ! wp core is-installed --path="$WP_PATH" --allow-root; then
   echo "Installation de WordPress..."
   wp core install \
