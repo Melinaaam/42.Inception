@@ -59,7 +59,7 @@ services:
     env_file:
       - .env
     volumes:
-      - wordpress:/var/www/html
+      - wordpress:/var/www/html:ro
     networks:
       - inception
     depends_on:

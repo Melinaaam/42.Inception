@@ -24,6 +24,13 @@ RUN apt update -y && \
     apt clean
 
 RUN mkdir -p /var/www/html /run/php
+RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 755 /var/www/html
+
+# Télécharger et installer WordPress
+RUN wget https://wordpress.org/latest.tar.gz && tar -xzf latest.tar.gz && \
+    mv wordpress/* /var/www/html && rm -rf wordpress latest.tar.gz
+
 
 RUN sed -i 's|^listen = .*|listen = 0.0.0.0:9000|' /etc/php/7.4/fpm/pool.d/www.conf
 
