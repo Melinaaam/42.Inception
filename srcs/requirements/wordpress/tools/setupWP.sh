@@ -7,7 +7,7 @@ export WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_password.txt)
 export WP_USER_PASSWORD=$(cat /run/secrets/wp_user_password.txt)
 export MYSQL_PASSWORD=$(cat /run/secrets/db_password.txt)
 
-mkdir -p /run/php
+# mkdir -p /run/php
 WP_PATH="/var/www/html"
 
 if [ ! -f "$WP_PATH/wp-load.php" ]; then
@@ -44,7 +44,7 @@ if ! wp core is-installed --path="$WP_PATH" --allow-root; then
     --admin_password="${WP_ADMIN_PASSWORD}" \
     --admin_email="${WP_ADMIN_EMAIL}" \
     --allow-root
-
+  echo "Création de l'utilisateur..."
   wp user create "${WP_USER}" "${WP_USER_EMAIL}" \
     --user_pass="${WP_USER_PASSWORD}" \
     --role=editor \
