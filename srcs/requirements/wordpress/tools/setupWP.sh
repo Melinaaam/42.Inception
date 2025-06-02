@@ -52,4 +52,4 @@ if ! wp core is-installed --path="$WP_PATH" --allow-root; then
     --allow-root
 fi
 
-exec php-fpm7.4 -F
+exec /usr/sbin/php-fpm7.4 -F

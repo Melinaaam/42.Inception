@@ -1,5 +1,6 @@
 version: "3.8"
 
+
 services:
   mariadb:
     container_name: mariadb
@@ -24,11 +25,11 @@ services:
       - db_password.txt
       - db_root_password.txt
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
       interval: 10s
       timeout: 5s
       retries: 5
-      
+
   wordpress:
     container_name: wordpress
     build:
