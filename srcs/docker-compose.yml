@@ -59,14 +59,13 @@ services:
     env_file:
       - .env
     volumes:
-      - wordpress:/var/www/html:ro
+      - wordpress:/var/www/html
     networks:
       - inception
     depends_on:
       - wordpress
     ports:
       - "443:443"
-      - "80:80"
     restart: always
 
 volumes:
