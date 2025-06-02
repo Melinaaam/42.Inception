@@ -20,7 +20,7 @@ MYSQL_PID=$!
 
 echo "Attente du démarrage de MariaDB..."
 while ! mysqladmin ping --socket=/run/mysqld/mysqld.sock --silent; do
-    sleep 1
+    sleep 10
 done
 
 mysql --socket=/run/mysqld/mysqld.sock -u root <<EOF

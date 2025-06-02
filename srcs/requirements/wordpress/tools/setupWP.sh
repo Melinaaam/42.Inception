@@ -31,7 +31,7 @@ EOF
 
 until mysql -h "mariadb" -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" -e "SELECT 1" &>/dev/null; do
   echo "En attente de MariaDB..."
-  sleep 2
+  sleep 5
 done
 
 if ! wp core is-installed --path="$WP_PATH" --allow-root; then
