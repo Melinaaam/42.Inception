@@ -4,20 +4,24 @@ RUN apt-get update -y && \
     apt-get upgrade -y && \
     apt-get install -y nginx openssl 
 
+# Create SSL directory
 RUN mkdir -p /etc/nginx/ssl
 
-RUN openssl req -x509 -nodes -days 365 \
-    -keyout /etc/nginx/ssl/inception.key \
-    -out /etc/nginx/ssl/inception.crt \
-    -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=42/CN=memotyle.42.fr/UID=memotyle"
+# Generate self-signed SSL certificate
+RUN openssl req -x509 -nodes \
+  -out /etc/nginx/ssl/inception.crt \
+  -keyout /etc/nginx/ssl/inception.key \
+  -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=42/CN=memotyle.42.fr/UID=memotyle"
 
-COPY ./conf/nginx.conf /etc/nginx/nginx.conf
+# Create nginx runtime directory
+RUN mkdir -p /var/run/nginx
 
+# Copy my configuration files in the container filesystem
+COPY conf/nginx.conf /etc/nginx/nginx.conf
 
-RUN mkdir -p /var/run/nginx /var/log/nginx
+# Set permissions for web directory
 RUN chmod 755 /var/www/html
 RUN chown -R www-data:www-data /var/www/html
 
-EXPOSE 443
-
+# Run Nginx in foreground
 CMD ["nginx", "-g", "daemon off;"]

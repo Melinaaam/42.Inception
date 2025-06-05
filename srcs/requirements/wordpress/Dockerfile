@@ -1,37 +1,21 @@
+# Stable version
 FROM debian:bullseye
 
-RUN apt update -y && \
-    apt upgrade -y && \
-    apt install -y \
-        php7.4-fpm \
-        php7.4-mysql \
-        php-curl \
-        php-gd \
-        php-mbstring \
-        php-xml \
-        php-zip \
-        mariadb-client \
-        wget \
-        curl \
-        unzip \
-        sed \
-        less \
-        vim \
-        gnupg \
-        sendmail \
-        dos2unix \
-        lsb-release && \
-    apt clean
+# Update system and install PHP + dependencies
+RUN apt update -y && apt upgrade -y
+RUN apt-get install -y php7.4 php7.4-fpm php7.4-mysql wget mariadb-client sed
 
-RUN mkdir -p /var/www/html /run/php
+# Create necessary directories for PHP-FPM
+RUN mkdir -p /run/php
+RUN mkdir -p /var/www/html
 RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html
 
-# Télécharger et installer WordPress
+# Download and install WordPress
 RUN wget https://wordpress.org/latest.tar.gz && tar -xzf latest.tar.gz && \
     mv wordpress/* /var/www/html && rm -rf wordpress latest.tar.gz
 
-
+# Configure PHP-FPM to listen on network instead of Unix socket (socket = btw apps VS TCP = btw containers or machines)
 RUN sed -i 's|^listen = .*|listen = 0.0.0.0:9000|' /etc/php/7.4/fpm/pool.d/www.conf
 
 # Set PHP-FPM user and group to www-data (default user for web servers ~= root)
@@ -42,14 +26,17 @@ RUN sed -i 's|^;listen.mode = .*|listen.mode = 0660|' /etc/php/7.4/fpm/pool.d/ww
 # Configure PID file for PHP-FPM (PID file is used to manage the PHP-FPM process = know if it's running)
 RUN sed -i 's|^;pid = .*|pid = /run/php/php7.4-fpm.pid|' /etc/php/7.4/fpm/php-fpm.conf
 
-
+# Copy my setupWP script on the filesystem
 COPY tools/setupWP.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/setupWP.sh
 
-RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
-    chmod +x wp-cli.phar && \
-    mv wp-cli.phar /usr/local/bin/wp
+# Install WP-CLI for WordPress management
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN chmod +x wp-cli.phar
+RUN mv wp-cli.phar /usr/local/bin/wp
 
+# Expose PHP-FPM port
 EXPOSE 9000
 
+# Run setupWP script then start PHP-FPM
 CMD ["/bin/bash", "-c", "/usr/local/bin/setupWP.sh && /usr/sbin/php-fpm7.4 -F"]

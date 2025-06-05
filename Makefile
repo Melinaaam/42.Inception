@@ -1,24 +1,36 @@
-NAME=inception
-COMPOSE=docker-compose -f srcs/docker-compose.yml --env-file srcs/.env
+NAME = inception
+DOCKER_COMPOSE = srcs/docker-compose.yml
+DATA_PATH = /home/$(USER)/data
+
+all: setup build up
+
+setup:
+	@sudo mkdir -p $(DATA_PATH)/wordpress
+	@sudo mkdir -p $(DATA_PATH)/mariadb
+	@if ! grep -q "127.0.0.1 $(USER).42.fr" /etc/hosts; then \
+		echo "127.0.0.1 $(USER).42.fr" | sudo tee -a /etc/hosts; \
+	fi
+
+build:
+	docker-compose -f $(DOCKER_COMPOSE) build
 
 up:
-	sudo mkdir -p /home/${USER}/data/wordpress
-	sudo mkdir -p /home/${USER}/data/mariadb
-	$(COMPOSE) up -d --build
-down:
-	$(COMPOSE) down
+	docker-compose -f $(DOCKER_COMPOSE) up -d
 
-clean:
-	$(COMPOSE) down --volumes
+down:
+	docker-compose -f $(DOCKER_COMPOSE) down
+
+clean: down
+	docker system prune -a
 
 fclean: clean
-	docker system prune -af
-	docker volume prune -f
-	docker network prune -f
-	sudo rm -rf /home/${USER}/data/wordpress /home/${USER}/data/mariadb
+	sudo rm -rf $(DATA_PATH)
+	@if [ $$(docker volume ls -q | wc -l) -gt 0 ]; then \
+		docker volume rm -f $$(docker volume ls -q); \
+	else \
+		echo "No volumes to remove"; \
+	fi
 
-re: fclean up
+re: fclean all
 
-rebuild: fclean up
-
-.PHONY: up down clean fclean re
+.PHONY: all setup build up down clean fclean re
